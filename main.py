@@ -1,4 +1,5 @@
 from ai.client import ask_ai
+from app.chat import send_message
 
 from database.conversations import (
     create_conversation,
@@ -61,12 +62,7 @@ def chat(conversation_id):
             continue
         
         try:
-            response = ask_ai(prompt, history)
-       
-            
-            # Save both sides of the conversation to the database
-            add_message(conversation_id, "user", prompt)
-            add_message(conversation_id, "assistant", response)  
+            response = send_message(conversation_id, prompt)
             
             print(f"\nHTB Mentor: {response}")
             
