@@ -11,13 +11,15 @@ DATABASE_PATH = PROJECT_ROOT / "data" / "mentor.db"
 
 
 @contextmanager
-def get_connection():
+def get_connection(db_path=DATABASE_PATH):
     """Create and manage a SQLite database connection."""
+    
+    db_path = Path(db_path)  # Ensure db_path is a Path object
 
     # Ensure the database directory exists
-    DATABASE_PATH.parent.mkdir(parents=True, exist_ok=True)
+    db_path.parent.mkdir(parents=True, exist_ok=True)
 
-    connection = sqlite3.connect(DATABASE_PATH)
+    connection = sqlite3.connect(db_path)
 
     # Return database rows as dictionary-like objects
     connection.row_factory = sqlite3.Row
