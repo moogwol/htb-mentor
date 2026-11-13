@@ -3,6 +3,7 @@ from ai.client import ask_ai
 from database.conversations import (
     create_conversation,
     get_conversation,
+    get_all_conversations,
 )
 
 from database.messages import (
@@ -11,23 +12,35 @@ from database.messages import (
 )
 
 def select_conversation():
-    choice = input(
-        "Enter conversation ID or 0 to start a new conversation: "
+    conversations = get_all_conversations()
+
+    print("\nExisting conversations:")
+
+    for conversation in conversations:
+        print(
+            f"{conversation['id']}: "
+            f"{conversation['title']} "
+            f"(Machine ID: {conversation['machine_id']})"
         )
-    
+
+    choice = input(
+        "\nEnter conversation ID or 0 to start a new conversation: "
+    )
+
     if choice == "0":
         machine_id = int(input("Enter HTB machine ID: "))
         title = input("Enter conversation title: ")
-        
-        conversation_id = create_conversation(machine_id, title)
-        return conversation_id
-    
+
+        return create_conversation(machine_id, title)
+
     conversation_id = int(choice)
     conversation = get_conversation(conversation_id)
-    
+
     if conversation is None:
-        print("Conversation not found. ")
+        print("Conversation not found.")
         return None
+
+    return conversation_id
 
 def chat(conversation_id):
     stored_messages = get_messages(conversation_id) 

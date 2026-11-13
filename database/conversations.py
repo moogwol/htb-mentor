@@ -26,3 +26,15 @@ def get_conversation(conversation_id, db_path=None):
         ).fetchone()
 
         return dict(result) if result else None
+    
+def get_all_conversations(db_path=None):
+    with get_connection(db_path) as connection:
+        results = connection.execute(
+            """
+            SELECT id, machine_id, title, created_at
+            FROM conversations
+            ORDER BY id DESC
+            """
+        ).fetchall()
+
+        return [dict(row) for row in results]    
