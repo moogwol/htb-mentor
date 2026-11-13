@@ -64,4 +64,11 @@ def create_messages_table(db_path=None):
 
                 CHECK (role IN ('user', 'assistant', 'system'))
             )
-        """)               
+        """)     
+        
+        
+def create_all_tables():
+    create_machines_table()
+    create_writeups_table()
+    create_conversations_table()
+    create_messages_table()                  

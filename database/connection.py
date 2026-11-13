@@ -14,7 +14,10 @@ DATABASE_PATH = PROJECT_ROOT / "data" / "mentor.db"
 def get_connection(db_path=DATABASE_PATH):
     """Create and manage a SQLite database connection."""
     
-    db_path = Path(db_path)  # Ensure db_path is a Path object
+    if db_path is None:
+        db_path = DATABASE_PATH
+        
+    db_path = Path(db_path)    
 
     # Ensure the database directory exists
     db_path.parent.mkdir(parents=True, exist_ok=True)

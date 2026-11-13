@@ -1,65 +1,72 @@
-from openai import OpenAI
-from dotenv import load_dotenv
-import os
+from ai.client import ask_ai
 
-from database import (initialize_database,
-                      save_message,
-                      load_history
-                      )
-
-load_dotenv()
-
-client = OpenAI(
-    api_key=os.getenv("OPEN_AI_KEY")
+from database.conversations import (
+    create_conversation,
+    get_conversation,
 )
 
-# Read the system prompt from the file
-with open("htb-mentor-prompt.md", "r", encoding="utf-8") as file:
-    mentor_prompt = file.read()
+from database.messages import (
+    add_message,
+    get_messages,
+)
 
-# Initialize the database and load the conversation history    
-initialize_database()    
-history = load_history()
-print(f"Loaded {len(history)} messages from database")
+def select_conversation():
+    choice = input(
+        "Enter conversation ID or 0 to start a new conversation: "
+        )
+    
+    if choice == "0":
+        machine_id = int(input("Enter HTB machine ID: "))
+        title = input("Enter conversation title: ")
+        
+        conversation_id = create_conversation(machine_id, title)
+        return conversation_id
+    
+    conversation_id = int(choice)
+    conversation = get_conversation(conversation_id)
+    
+    if conversation is None:
+        print("Conversation not found. ")
+        return None
 
-# Create the chat loop
-while True:
-    user_input = input("\nYou: ")
+def chat(conversation_id):
+    stored_messages = get_messages(conversation_id) 
     
-    if user_input.lower() in ["exit", "quit"]:
-        print("Exiting the chat. Goodbye!")
-        break
-    
-    history.append({
-        "role": "user",
-        "content": user_input
-        })
-    
-    save_message("user", user_input)
-    
-    messages = [
-        {
-            "role": "system",
-            "content": mentor_prompt
-        }   
-    ]
-    
-    # include the conversation history in the messages
-    messages.extend(history)
+    # Only send role and content to the AI, not the message ID or conversation ID
+    history = [{"role": message["role"], "content": message["content"]} for message in stored_messages]   
 
-    response = client.chat.completions.create(
-        model="gpt-4.1-mini",
-        messages=messages
-    )
-    
+    print("\nHTB Mentor rady. Type 'exit' or 'bye' to end the conversation.")
+
+    while True:
+        prompt = input("\nYou: ").strip()
+        
+        if prompt.lower() in ["exit", "bye"]:
+            print("HTB Mentor: Goodbye!")
+            break
+        
+        if not prompt:
+            continue
+        
+        try:
+            response = ask_ai(prompt, history)
        
-    # Get the agent's response and print it
-    agent_response = response.choices[0].message.content
-    print(f"\nHTB Mentor: {agent_response}")
+            
+            # Save both sides of the conversation to the database
+            add_message(conversation_id, "user", prompt)
+            add_message(conversation_id, "assistant", response)  
+            
+            print(f"\nHTB Mentor: {response}")
+            
+        except Exception as error:
+            print(f"\nOh shit! Something went wrong: {error}")    
+        
+        
+        
+def main():
+    conversation_id = select_conversation()
     
-    # Append the agent's response to the history
-    history.append({
-        "role": "assistant",
-        "content": agent_response
-    })
-    save_message("assistant", agent_response)
+    if conversation_id is not None:
+        chat(conversation_id)
+        
+if __name__ == "__main__":
+    main()             
