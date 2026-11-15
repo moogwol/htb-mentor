@@ -1,11 +1,12 @@
 
 import streamlit as st
+import sqlite3
 import tempfile
 from pathlib import Path
 
 from database.conversations import get_all_conversations, create_conversation
 from database.messages import get_messages
-from database.machines import get_all_machines
+from database.machines import get_all_machines, create_machine
 from database.writeups import get_writeups_by_machine
 from knowledge_base.importer import import_writeup
 from app.chat import send_message
@@ -122,7 +123,43 @@ elif page == "Knowledge Base":
 
     st.header("Knowledge Base")
     st.write("Import and manage HTB machine walkthroughs.")
-
+    
+    # Add a new machine
+    st.subheader("Add a new machine")
+    
+    with st.form("add_machine_form"):
+        machine_name = st.text_input("Machine name")
+        
+        machine_os = st.selectbox(
+            "Machine OS",
+            ["Linux", "Windows"]
+        )
+        
+        machine_difficulty = st.selectbox(
+            "Difficulty",
+            ["Easy", "Medium", "Hard", "Insane"]
+        )
+        
+        submitted = st.form_submit_button("Add machine")
+        
+        if submitted:
+            if not machine_name.strip():
+                st.error("Please enter a machine name.")
+            else:
+                try:
+                    create_machine(
+                        name=machine_name.strip(),
+                        os=machine_os,
+                        difficulty=machine_difficulty
+                    )
+                    
+                    st.success(f"Machine '{machine_name}' added successfully!")
+                    st.rerun()  # Refresh the page to show the new machine
+                    
+                except sqlite3.IntegrityError:
+                    st.error(f"A machine with the name '{machine_name.strip()}' already exists.")
+                    
+                        
     machines = get_all_machines()
 
     if not machines:

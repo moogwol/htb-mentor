@@ -1,6 +1,21 @@
 from database.connection import get_connection
 
 
+def create_machine(name, os, difficulty, db_path=None):
+    """Create a new machine in the database."""
+
+    with get_connection(db_path) as connection:
+        cursor =connection.execute(
+            """
+            INSERT INTO machines (name, os, difficulty)
+            VALUES (?, ?, ?)
+            """,
+            (name, os, difficulty))  
+        
+        return cursor.lastrowid  # Return the ID of the newly created machine
+        
+
+
 def get_all_machines(db_path=None):
     """Retrieve all machines from the database."""
 
@@ -10,4 +25,5 @@ def get_all_machines(db_path=None):
                                     FROM machines
                                     ORDER BY name
                                     """).fetchall()
-        return results
+        
+        return [dict(row) for row in results]
