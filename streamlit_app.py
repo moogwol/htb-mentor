@@ -3,7 +3,7 @@ import streamlit as st
 import tempfile
 from pathlib import Path
 
-from database.conversations import get_all_conversations
+from database.conversations import get_all_conversations, create_conversation
 from database.messages import get_messages
 from database.machines import get_all_machines
 from database.writeups import get_writeups_by_machine
@@ -33,9 +33,43 @@ page = st.sidebar.radio(
 
 if page == "Chat":
 
-    conversations = get_all_conversations()
 
     st.sidebar.header("Conversations")
+
+    # Create a new conversation
+    machines = get_all_machines()
+
+    if machines:
+        machine_options = {
+            machine["name"]: machine["id"]
+            for machine in machines
+        }
+
+        with st.sidebar.expander("New conversation"):
+            with st.form("new_conversation_form"):
+
+                selected_machine = st.selectbox(
+                    "Select HTB machine",
+                    options=list(machine_options.keys())
+                )
+
+                title = st.text_input("Conversation title")
+                submitted = st.form_submit_button("Create conversation")
+                
+                if submitted:
+                    if not title.strip():
+                        st.error("Please enter a conversation title.")
+                    else:
+                        create_conversation(
+                            machine_options[selected_machine],
+                            title.strip()
+                        )
+                        
+                        st.rerun()
+    else:
+        st.sidebar.warning("No machines found. Add a machine first.")                    
+                     
+    conversations = get_all_conversations()
 
     conversation_id = None
 
