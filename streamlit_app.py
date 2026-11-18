@@ -137,7 +137,12 @@ elif page == "Knowledge Base":
         
         machine_difficulty = st.selectbox(
             "Difficulty",
-            ["Easy", "Medium", "Hard", "Insane"]
+            ["Very Easy", "Easy", "Medium", "Hard", "Insane"]
+        )
+        
+        machine_info = st.text_area(
+            "Machine Info",
+            placeholder="Paste the machine info here description from Hack THe Box (optional)"
         )
         
         submitted = st.form_submit_button("Add machine")
@@ -150,7 +155,8 @@ elif page == "Knowledge Base":
                     create_machine(
                         name=machine_name.strip(),
                         os=machine_os,
-                        difficulty=machine_difficulty
+                        difficulty=machine_difficulty,
+                        machine_info=machine_info.strip() or None
                     )
                     
                     st.success(f"Machine '{machine_name}' added successfully!")

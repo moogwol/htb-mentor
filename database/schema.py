@@ -11,10 +11,11 @@ def create_machines_table(db_path=None):
                 os TEXT NOT NULL,
                 difficulty TEXT NOT NULL,
                 status TEXT NOT NULL DEFAULT 'not started',
+                machine_info TEXT,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 
                 CHECK (os IN ('Windows', 'Linux')),
-                CHECK (difficulty IN ('Easy', 'Medium', 'Hard', 'Insane')),
+                CHECK (difficulty IN ('Very Easy', 'Easy', 'Medium', 'Hard', 'Insane')),
                 CHECK (status IN ('not started', 'Active', 'Completed'))
             )
         """)
@@ -67,8 +68,8 @@ def create_messages_table(db_path=None):
         """)     
         
         
-def create_all_tables():
-    create_machines_table()
-    create_writeups_table()
-    create_conversations_table()
-    create_messages_table()                  
+def create_all_tables(db_path=None):
+    create_machines_table(db_path)
+    create_writeups_table(db_path)
+    create_conversations_table(db_path)
+    create_messages_table(db_path)                  

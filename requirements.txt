@@ -30,6 +30,7 @@ pydantic==2.14.3
 pydantic_core==2.50.4
 pydeck==0.9.3
 Pygments==2.21.0
+pypdf==7.1.0
 pytest==9.2.0
 python-dateutil==4.0.0
 python-dotenv==1.2.4
