@@ -62,3 +62,5 @@ def delete_writeup(writeup_id, db_path=None):
 
         return cursor.rowcount > 0
     
+
+    

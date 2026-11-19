@@ -67,9 +67,31 @@ def create_messages_table(db_path=None):
             )
         """)     
         
+
+def create_services_table(db_path=None):
+    with get_connection(db_path) as connection:
+        connection.execute("""
+                           CREATE TABLE IF NOT EXISTS services (
+                                 id INTEGER PRIMARY KEY AUTOINCREMENT,
+                                 machine_id INTEGER NOT NULL,
+                                 port INTEGER NOT NULL,
+                                 protocol TEXT NOT NULL,
+                                 name TEXT NOT NULL,
+                                 version TEXT,
+                                 state TEXT NOT NULL DEFAULT 'open',
+                                 notes TEXT,
+                                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                                 
+                                 FOREIGN KEY (machine_id) REFERENCES machines(id),
+                                 
+                                 UNIQUE (machine_id, port, protocol)
+                           ) 
+                           """)
+
         
 def create_all_tables(db_path=None):
     create_machines_table(db_path)
     create_writeups_table(db_path)
     create_conversations_table(db_path)
-    create_messages_table(db_path)                  
+    create_messages_table(db_path)   
+    create_services_table(db_path)               
