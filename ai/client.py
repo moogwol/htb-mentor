@@ -1,9 +1,12 @@
 import os
+import json
 from pathlib import Path
 
 
 from dotenv import load_dotenv
 from openai import OpenAI
+
+from .tools import tools, call_function
 
 load_dotenv()
 
@@ -45,12 +48,51 @@ def ask_ai(prompt, history=None, context=None):
     
    
     
+    
     response = client.responses.create(
         model=MODEL,
         instructions=SYSTEM_PROMPT,
-        input=messages
+        input=messages,
+        tools=tools
     )
-    
+
+    while True:
+        function_calls = [
+            item for item in response.output
+            if item.type == "function_call"
+        ]
+
+        if not function_calls:
+            break
+
+        messages.extend(response.output)
+
+        function_outputs = []
+
+        for item in function_calls:
+            result = call_function(
+                item.name,
+                item.arguments
+            )
+
+            function_outputs.append({
+                "type": "function_call_output",
+                "call_id": item.call_id,
+                "output": json.dumps(result, default=dict)
+            })
+
+        messages.extend(function_outputs)
+
+        response = client.responses.create(
+            model=MODEL,
+            instructions=SYSTEM_PROMPT,
+            input=messages,
+            tools=tools
+        )
+      
+            
+            
+            
     answer = response.output_text.strip()
     
     history.append({"role": "user", "content": prompt})
